@@ -5,9 +5,13 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\DrawingRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
- * @ApiResource()
+ * @ApiResource(
+ *      normalizationContext={"groups"={"drawing:read"}},
+ *      denormalizationContext={"groups"={"drawing:write"}}
+ * )
  * @ORM\Entity(repositoryClass=DrawingRepository::class)
  */
 class Drawing
@@ -16,43 +20,72 @@ class Drawing
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * 
+     * @Groups("drawing:read")
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * 
+     * @Groups({"drawing:read", "drawing:write"})
      */
     private $title;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * 
+     * @Groups("drawing:read")
      */
     private $slug;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="text", nullable=true)
+     * 
+     * @Groups({"drawing:read", "drawing:write"})
      */
     private $content;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
+     * 
+     * @Groups({"drawing:read", "drawing:write"})
      */
     private $picture;
 
     /**
      * @ORM\Column(type="boolean")
+     * 
+     * @Groups("drawing:read")
      */
     private $isPublished;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
+     * 
+     * @Groups("drawing:read")
      */
     private $publishedAt;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime", nullable=true)
+     * 
+     * @Groups("drawing:read")
      */
     private $updatedAt;
+
+    /**
+     * @ORM\Column(type="datetime")
+     *
+     * @Groups("drawing:read")
+     */
+    private $createdAt;
+
+    public function __construct()
+    {
+        $this->isPublished = false;
+        $this->createdAt = new \DateTime();
+    }
 
     public function getId(): ?int
     {
@@ -139,6 +172,19 @@ class Drawing
     public function setUpdatedAt(\DateTimeInterface $updatedAt): self
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeInterface $createdAt): self
+    {
+        $this->createdAt = $createdAt;
 
         return $this;
     }
