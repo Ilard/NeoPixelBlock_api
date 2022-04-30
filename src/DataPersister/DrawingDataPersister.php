@@ -5,6 +5,8 @@ use App\Entity\Drawing;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use ApiPlatform\Core\DataPersister\ContextAwareDataPersisterInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class DrawingDataPersister implements ContextAwareDataPersisterInterface
 {
@@ -12,14 +14,25 @@ class DrawingDataPersister implements ContextAwareDataPersisterInterface
      * @var EntityManagerInterface
      */
     private $_entityManager;
+
+    /**
+     * @param SluggerInterface
+     */
     private $_slugger;
+
+    /**
+     * @param Request
+     */
+    private $_request;
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        SluggerInterface $slugger
+        SluggerInterface $slugger,
+        RequestStack $request
     ) {
         $this->_entityManager = $entityManager;
         $this->_slugger = $slugger;
+        $this->_request = $request->getCurrentRequest();
     }
 
     /**
@@ -42,7 +55,10 @@ class DrawingDataPersister implements ContextAwareDataPersisterInterface
                 ->_slugger
                 ->slug(strtolower($data->getTitle())). '-' .uniqid()
         );
-
+        // Set the updatedAt value if it's not a POST request
+        if ($this->_request->getMethod() !== 'POST') {
+            $data->setUpdatedAt(new \DateTime());
+        }
         $this->_entityManager->persist($data);
         $this->_entityManager->flush();
     }
