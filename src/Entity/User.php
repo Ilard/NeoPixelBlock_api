@@ -8,6 +8,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use ApiPlatform\Core\Annotation\ApiResource;
+use Symfony\Component\Serializer\Annotation\SerializedName;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
@@ -42,7 +43,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var string The hashed password
      * @ORM\Column(type="string")
-     * @Groups("user:write")
      */
     private $password;
 
@@ -57,6 +57,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @Groups({"user:read", "user:write"})
      */
     private $name;
+
+
+    /**
+     * @Groups("user:write")
+     *
+     * @SerializedName("password")
+     */
+    private $plainPassword;
+
 
     public function getId(): ?int
     {
@@ -126,6 +135,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
+    public function getPlainPassword(): string
+    {
+        return $this->plainPassword;
+    }
+
+    public function setPlainPassword(string $plainPassword): self
+    {
+        $this->plainPassword = $plainPassword;
+
+        return $this;
+    }
+
 
     /**
      * Returning a salt is only needed, if you are not using a modern
